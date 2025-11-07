@@ -1,23 +1,40 @@
 import 'package:ecommerce_app/providers/cart_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ecommerce_app/screens/order_success_screen.dart';
 
-class CartScreen extends StatelessWidget {
+
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
   @override
+
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+
+class _CartScreenState extends State<CartScreen> {
+
+
+  bool _isLoading = false;
+
+
+  @override
   Widget build(BuildContext context) {
+
     final cart = Provider.of<CartProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Cart'),
+        title: const Text('𝐘𝐨𝐮𝐫 𝐂𝐚𝐫𝐭'),
       ),
       body: Column(
         children: [
+
           Expanded(
+
             child: cart.items.isEmpty
-                ? const Center(child: Text('Your cart is empty'))
+                ? const Center(child: Text('Your cart is empty.'))
                 : ListView.builder(
               itemCount: cart.items.length,
               itemBuilder: (context, index) {
@@ -25,6 +42,7 @@ class CartScreen extends StatelessWidget {
 
                 return ListTile(
                   leading: CircleAvatar(
+
                     child: Text(cartItem.name[0]),
                   ),
                   title: Text(cartItem.name),
@@ -32,11 +50,14 @@ class CartScreen extends StatelessWidget {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+
                       Text(
                           '₱${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}'),
+
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
+                        icon: const Icon(Icons.delete, color: Colors.blue),
                         onPressed: () {
+
                           cart.removeItem(cartItem.id);
                         },
                       ),
@@ -46,6 +67,8 @@ class CartScreen extends StatelessWidget {
               },
             ),
           ),
+
+
           Card(
             margin: const EdgeInsets.all(16),
             child: Padding(
@@ -65,7 +88,59 @@ class CartScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+
+
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
+
+
+              onPressed: (_isLoading || cart.items.isEmpty) ? null : () async {
+
+                setState(() {
+                  _isLoading = true;
+                });
+
+                try {
+
+                  final cartProvider = Provider.of<CartProvider>(context, listen: false);
+
+
+                  await cartProvider.placeOrder();
+                  await cartProvider.clearCart();
+
+
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => const OrderSuccessScreen()),
+                        (route) => false,
+                  );
+
+                } catch (e) {
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to place order: $e')),
+                  );
+                } finally {
+
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                }
+              },
+
+
+              child: _isLoading
+                  ? const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+              )
+                  : const Text('Place Order'),
+            ),
+          ),
         ],
       ),
     );

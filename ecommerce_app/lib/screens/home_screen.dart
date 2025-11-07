@@ -7,35 +7,17 @@ import 'package:ecommerce_app/screens/product_detail_screen.dart';
 import 'package:ecommerce_app/providers/cart_provider.dart';
 import 'package:ecommerce_app/screens/cart_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:ecommerce_app/screens/order_history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-          )
-        ],
-      ),
-      body: const Center(
-        child: Text("You are logged in!"),
-      ),
-    );
-  }
-
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _userRole = 'user';
+  String _userRole = 'admin';
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   @override
@@ -66,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       await FirebaseAuth.instance.signOut();
     } catch (e) {
-      print("Error signing out: $e");
+      print('Error signing out: $e');
     }
   }
 
@@ -74,24 +56,42 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-        Text(_currentUser != null ? 'Welcome, ${_currentUser!.email}' : 'Home'),
+        title: Text(_currentUser != null ? 'Welcome, ${_currentUser!.email}' : 'Home'),
         actions: [
 
+
           Consumer<CartProvider>(
+
             builder: (context, cart, child) {
+
               return Badge(
+
                 label: Text(cart.itemCount.toString()),
+
                 isLabelVisible: cart.itemCount > 0,
+
                 child: IconButton(
                   icon: const Icon(Icons.shopping_cart),
                   onPressed: () {
+
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const CartScreen(),
                       ),
                     );
                   },
+                ),
+              );
+            },
+          ),
+
+          IconButton(
+            icon: const Icon(Icons.receipt_long),
+            tooltip: 'My Orders',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const OrderHistoryScreen(),
                 ),
               );
             },
@@ -116,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('products')
@@ -141,28 +142,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return GridView.builder(
             padding: const EdgeInsets.all(10.0),
-
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              childAspectRatio: 3/4,
+              childAspectRatio: 3 / 4,
             ),
 
             itemCount: products.length,
             itemBuilder: (context, index) {
+
               final productDoc = products[index];
+
               final productData = productDoc.data() as Map<String, dynamic>;
+
 
               return ProductCard(
                 productName: productData['name'],
                 price: productData['price'],
                 imageUrl: productData['imageUrl'],
 
+
                 onTap: () {
+
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => ProductDetailScreen(
+
                         productData: productData,
                         productId: productDoc.id,
                       ),

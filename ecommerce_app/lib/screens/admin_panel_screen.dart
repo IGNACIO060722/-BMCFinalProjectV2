@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_app/screens/admin_order_screen.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -9,14 +10,21 @@ class AdminPanelScreen extends StatefulWidget {
 }
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
+
   final _formKey = GlobalKey<FormState>();
+
+
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _imageUrlController = TextEditingController();
 
+
   bool _isLoading = false;
+
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
   @override
   void dispose() {
@@ -27,7 +35,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     super.dispose();
   }
 
+
   Future<void> _uploadProduct() async {
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -37,19 +47,24 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     });
 
     try {
+
       String imageUrl = _imageUrlController.text.trim();
+
 
       await _firestore.collection('products').add({
         'name': _nameController.text.trim(),
         'description': _descriptionController.text.trim(),
+
         'price': double.tryParse(_priceController.text.trim()) ?? 0.0,
         'imageUrl': imageUrl,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Product uploaded successfully")),
+        const SnackBar(content: Text('Product uploaded successfully!')),
       );
+
 
       _formKey.currentState!.reset();
       _nameController.clear();
@@ -58,10 +73,12 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       _imageUrlController.clear();
 
     } catch (e) {
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to upload product: $e')),
       );
     } finally {
+
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -74,76 +91,123 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin - Add Product'),
+
+        title: const Text('𝐀𝐝𝐦𝐢𝐧 𝐏𝐚𝐧𝐞𝐥'),
       ),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _imageUrlController,
-                  decoration: const InputDecoration(labelText: 'Image URL'),
-                  keyboardType: TextInputType.url,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter an image URL';
-                    }
-                    if (!value.startsWith('http')) {
-                      return 'Please enter a valid URL (e.g., http://...)';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
 
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Product Name'),
-                  validator: (value) =>
-                  value!.isEmpty ? 'Please enter a name' : null,
-                ),
-                const SizedBox(height: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
 
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: 'Description'),
-                  maxLength: 3,
-                  validator: (value) =>
-                  value!.isEmpty ? 'Please enter a description' : null,
-                ),
-                const SizedBox(height: 16),
 
-                TextFormField(
-                  controller: _priceController,
-                  decoration: const InputDecoration(labelText: 'Price'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    return null;
-                  },
+              ElevatedButton.icon(
+                icon: const Icon(Icons.list_alt),
+                label: const Text('Manage All Orders'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pinkAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 16),
                 ),
-                const SizedBox(height: 20),
+                onPressed: () {
 
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16)
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AdminOrderScreen(),
                     ),
-                    onPressed: _isLoading ? null: _uploadProduct,
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('Upload Product')
+                  );
+                },
+              ),
+
+
+              const Divider(height: 30, thickness: 1),
+
+              const Text(
+                'Add New Product',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+
+
+              Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+
+
+                    TextFormField(
+                      controller: _imageUrlController,
+                      decoration: const InputDecoration(labelText: 'Image URL'),
+                      keyboardType: TextInputType.url,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter an image URL';
+                        }
+                        if (!value.startsWith('http')) {
+                          return 'Please enter a valid URL (e.g., http://...)';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(labelText: 'Product Name'),
+                      validator: (value) =>
+                      value!.isEmpty ? 'Please enter a name' : null,
+                    ),
+                    const SizedBox(height: 16),
+
+
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: const InputDecoration(labelText: 'Description'),
+                      maxLines: 3,
+                      validator: (value) =>
+                      value!.isEmpty ? 'Please enter a description' : null,
+                    ),
+                    const SizedBox(height: 16),
+
+
+                    TextFormField(
+                      controller: _priceController,
+                      decoration: const InputDecoration(labelText: 'Price'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a price';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+
+                      onPressed: _isLoading ? null : _uploadProduct,
+
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text('Upload Product'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

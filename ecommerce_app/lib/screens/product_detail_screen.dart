@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:ecommerce_app/providers/cart_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:ecommerce_app/providers/cart_provider.dart'; // 1. ADD THIS
+import 'package:provider/provider.dart'; // 2. ADD THIS
+
 
 class ProductDetailScreen extends StatelessWidget {
+
+
   final Map<String, dynamic> productData;
+
   final String productId;
+
 
   const ProductDetailScreen({
     super.key,
@@ -14,23 +19,32 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
     final String name = productData['name'];
     final String description = productData['description'];
-    final String image = productData['imageUrl'];
+    final String imageUrl = productData['imageUrl'];
     final double price = productData['price'];
+
 
     final cart = Provider.of<CartProvider>(context, listen: false);
 
+
     return Scaffold(
       appBar: AppBar(
+
         title: Text(name),
       ),
+
       body: SingleChildScrollView(
         child: Column(
+
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+
+
             Image.network(
-              image,
+              imageUrl,
               height: 300,
               fit: BoxFit.cover,
 
@@ -48,11 +62,15 @@ class ProductDetailScreen extends StatelessWidget {
                 );
               },
             ),
+
+
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+
                   Text(
                     name,
                     style: const TextStyle(
@@ -62,18 +80,21 @@ class ProductDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
+
                   Text(
                     '₱${price.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: Colors.deepPurple,
+                      color: Colors.pink,
                     ),
                   ),
                   const SizedBox(height: 16),
 
+
                   const Divider(thickness: 1),
                   const SizedBox(height: 16),
+
 
                   Text(
                     'About this item',
@@ -89,9 +110,12 @@ class ProductDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
+
                   ElevatedButton.icon(
                     onPressed: () {
-                      cart.addItems(productId, name, price);
+
+                      cart.addItem(productId, name, price);
+
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
